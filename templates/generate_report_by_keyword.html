@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Report by Keyword</title>
+</head>
+<body>
+    <h1>Generate Report by Keyword</h1>
+    
+    <!-- Form to input the keyword -->
+    <form action="/generate_report_by_keyword" method="post">
+        <label for="keyword">Enter Keyword:</label>
+        <input type="text" id="keyword" name="keyword" required>
+        <button type="submit">Generate Report</button>
+    </form>
+
+    <!-- Display the report results table -->
+    {{ report_table | safe }}
+</body>
+</html>

@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>News Sources Data</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Source Data</title>
     <style>
         table {
             border-collapse: collapse;
@@ -21,10 +23,20 @@
             background-color: #375e94;
             color: white;
         }
+
+        /* Additional style for the search form */
+        form {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>My Collection Data</h1>
+    <form action="/search" method="post">
+        <label for="search_query">Search:</label>
+        <input type="text" id="search_query" name="search_query" required>
+        <button type="submit">Search</button>
+    </form>
+    <h1>News Article Data</h1>
     {{ tables|safe }}
 </body>
 </html>
