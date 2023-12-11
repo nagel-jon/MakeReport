@@ -15,6 +15,8 @@
     <button onclick="viewSources()">View Sources</button>
     <button onclick="viewReports()">View Reports</button>
     <button onclick="generateReport()">Generate Report</button>
+    <button onclick="getArticles()">Get New Articles</button>
+
     <script>
         function viewArticles() {
             // Redirect to the collections page
@@ -31,6 +33,10 @@
         function generateReport() {
             // Redirect to the collections page
             window.location.href = "/generate_report";
+        }
+        function getArticles() {
+            // Redirect to the collections page
+            window.location.href = "/get_articles";
         }
     </script>
 </body>
