@@ -25,7 +25,7 @@ url = ('https://newsapi.org/v2/everything?'
 f'q={search_query}&'
 f'from={three_days_ago}&'
 'sortBy=popularity&'
-'apiKey=f84359a7c186476588c807200d3b467f')
+'apiKey={os.environ.get("NEWS_API_KEY")}}')
 
 response = requests.get(url)
 
