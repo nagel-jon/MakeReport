@@ -41,7 +41,7 @@ def view_collections():
 
     return render_template('view_collections.html', tables=[df.to_html(classes='data')], titles=df.columns.values)
 
-@app.route('/view_articles', methods=['GET'])
+@app.route('/view_articles', methods=['GET', 'POST'])
 def view_articles():
     client = MongoClient('mongodb://localhost:27017/')
     db = client.MakeReport
@@ -71,4 +71,18 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
+
+def search_articles():
+    query = request.args.get('query')
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client.MakeReport
+    collection = db.news_articles
+
+    df = pd.DataFrame(list(collection.find({'$text': {'$search': query}})))
+    return render_template('view_articles.html', tables=[df.to_html(classes='data')], titles=df.columns.values)
+
+
+    
+
+    
 
