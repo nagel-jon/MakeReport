@@ -16,6 +16,7 @@
     <button onclick="viewReports()">View Reports</button>
     <button onclick="generateReport()">Generate Report</button>
     <button onclick="getArticles()">Get New Articles</button>
+    <button onclick="searchTitleandDate()">Search Articles by Title and Date</button>
 
     <script>
         function viewArticles() {
@@ -37,6 +38,10 @@
         function getArticles() {
             // Redirect to the collections page
             window.location.href = "/get_articles";
+        }
+        function searchTitleandDate() {
+            // Redirect to the collections page
+            window.location.href = "/search_title_date";
         }
     </script>
 </body>

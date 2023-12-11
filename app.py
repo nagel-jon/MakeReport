@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify
 import pandas as pd
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 
@@ -16,12 +17,34 @@ db = client.MakeReport
 news_articles = db.news_articles
 topics = db.topics
 sources = db.sources
+reports = db.reports
 
 # Routes
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
+
+@app.route('/view_reports', methods=['GET', 'POST'])
+def view_reports():
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client.MakeReport
+    collection = db.reports
+    
+    if request.method == 'POST':
+        search_query = request.form['search_query']
+        results_df = perform_search_report_mongo(search_query)
+
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+
+        return render_template('search_reports.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
+    else:
+        # Handle the regular display of articles without a search query
+        df = pd.DataFrame(list(collection.find()))
+        search_query = None
+        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+
+        return render_template('view_reports.html', tables=[html_table], titles=df.columns.values, search_query=search_query)
 
 
 @app.route('/view_articles', methods=['GET', 'POST'])
@@ -127,18 +150,29 @@ def search_source_mongo(query):
     html_table = results_df.to_html(classes='table table-bordered', index=False)
     return html_table
 
-@app.route('/generate_report_by_keyword', methods=['GET', 'POST'])
-def generate_report_by_keyword():
-    if request.method == 'POST':
-        keyword = request.form['keyword']
-        report_df = get_report_data(keyword)
+def perform_search_report_mongo(query):
+    # Use the query to search the MongoDB collection and retrieve the results
+    result_cursor = reports.find({"report": {"$regex": f'.*{query}.*', "$options": "i"}})
+    results_df = pd.DataFrame(list(result_cursor))
 
-        # Convert DataFrame to HTML table
-        report_table = report_df.to_html(classes='table table-bordered', index=False)
+    # Convert DataFrame to HTML with custom styles
+    html_table = results_df.to_html(classes='table table-bordered', index=False)
+    return html_table
 
-        return render_template('generate_report_by_keyword.html', report_table=report_table)
-    else:
-        return render_template('generate_report_by_keyword.html')
+# @app.route('/generate_report_by_keyword', methods=['GET', 'POST'])
+# def generate_report_by_keyword():
+#     if request.method == 'POST':
+#         keyword = request.form['keyword']
+#         report_df = get_report_data(keyword)
+
+#         # Convert DataFrame to HTML table
+#         report_table = report_df.to_html(classes='table table-bordered', index=False)
+
+#         return render_template('generate_report_by_keyword.html', report_table=report_table)
+#     else:
+#         return render_template('generate_report_by_keyword.html')
+
+
 
 @app.route('/get_articles', methods=['GET', 'POST'])
 def get_articles_by_keyword():
@@ -170,6 +204,9 @@ def get_articles_by_keyword():
             # Clear previous data in the database
             news_articles.delete_many({})
 
+            #Clear Sources List 
+            sources.delete_many({})
+
             # Insert cleaned articles into the database
             for article in articles:
                 cleaned_article = {
@@ -181,6 +218,9 @@ def get_articles_by_keyword():
                     "content": article.get("content", "")
                 }
                 news_articles.insert_one(cleaned_article)
+                get_sources_from_url(cleaned_article)
+                
+
 
             df = pd.DataFrame(list(news_articles.find()))
             html_table = df.to_html(classes='table table-striped table-bordered', index=False)
@@ -188,15 +228,81 @@ def get_articles_by_keyword():
     else:
         return render_template('get_articles.html')
 
-# Sample function to simulate API call based on keyword
-def get_report_data(keyword):
-    # This is where you would make your API call using the provided keyword
-    # Replace the following lines with your actual API call and data processing
-    data = {
-        'Title': ['Result 1', 'Result 2', 'Result 3'],
-        'Description': ['Description 1', 'Description 2', 'Description 3']
+
+
+def get_sources_from_url(article):
+    url = article.get("url", "")
+    article_id = article.get("_id", "")
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    source = {
+        "name": domain,
+        "url": url,
+        "article_id": article_id
     }
-    return pd.DataFrame(data)
+    db.sources.insert_one(source)
+
+
+@app.route('/generate_report_from_articles', methods=['GET', 'POST'])
+def generate_report_from_articles():
+    if request.method == 'POST':
+        # Handle the POST request to generate the report
+        search_query = request.form['search_query']
+
+        openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+        # Get the article content from MongoDB
+        client = MongoClient('mongodb://localhost:27017/')
+        db = client.MakeReport
+        news_articles = db.news_articles
+
+        articles = news_articles.find()
+
+        # Concatenate article titles and content with search_query
+        report = search_query
+        character_count = len(report)
+        used_article_ids = []  # Initialize an empty list to store the article IDs
+
+        for article in articles:
+            article_id = article.get('_id', '')  # Get the article ID
+            used_article_ids.append(article_id)  # Add the article ID to the list
+
+            title = article.get('title', '')
+            content = article.get('content', '')
+
+            report += title[:30] + content[:100]
+            character_count = len(report)
+
+            if character_count >= 4500:
+                break
+        print(report)
+
+        completion = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are synthesizing news stories into a tweet."},
+                {"role": "user", "content": report},
+            ]
+        )
+        gpt_response_content = completion.choices[0].message.content
+
+        reports = db.reports
+
+        report_data = {
+            "search_query": search_query,
+            "report": gpt_response_content,
+            "article_ids": used_article_ids,
+        }
+
+        reports.insert_one(report_data)
+
+        return render_template('generate_report_from_articles.html', search_query=search_query, report=report_data)
+    
+    else:
+        # Handle the GET request, define an empty report
+        report_data = {"search_query": "", "report": "", "article_ids": []}
+        return render_template('generate_report_from_articles.html', search_query="", report=report_data)
+
 
 
 if __name__ == '__main__':
@@ -204,6 +310,8 @@ if __name__ == '__main__':
 
 
 
+    
+    
 
 
     
