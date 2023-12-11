@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Report</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <h1>Click A Below Option to Generate a Report via the following Criteria</h1>
+
+    <button onclick="generateReportByKeyword()">Generate Report By Keyword</button>
+    <button onclick="generateReportBySource()">Generate Report By Source</button>
+    <button onclick="generateReportByDate()">Generate Report By Date</button>
+
+    <script>
+        function generateReportByKeyword() {
+            // Redirect to the collections page
+            window.location.href = "/generate_report_by_keyword";
+        }
+        function generateReportBySource() {
+            // Redirect to the collections page
+            window.location.href = "/generate_report_by_source";
+        }
+        function generateReportByDate() {
+            // Redirect to the collections page
+            window.location.href = "/generate_report_by_date";
+        }
+    </script>
+</body>
+</html>
