@@ -192,7 +192,7 @@ def get_articles_by_keyword():
             f'q={search_query}&'
             f'from={three_days_ago}&'
             'sortBy=popularity&'
-            'apiKey=[os.getenv("NEWS_API_KEY")]')
+            f'apiKey={os.getenv("NEWS_API_KEY")}')
 
         response = requests.get(url)
 
