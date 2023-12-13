@@ -6,10 +6,17 @@
     <title>Search Results</title>
 </head>
 <body>
+    <button onclick="goIndex()">Home</button>
     <h1>Search Results</h1>
     <p>You searched for: {{ query }}</p>
 
     <!-- Display the search results table -->
     {{ results_table | safe }}
+    <script>
+        function goIndex() {
+            // Redirect to the Index Page
+            window.location.href = "/";
+        }
+    </script>
 </body>
 </html>

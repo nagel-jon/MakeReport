@@ -11,15 +11,20 @@
         <li>Click a View Button to see the Objects in that Collection</li>
         <li>Click Generate Report to generate a new News Report</li>
     </u1>    
+    <button onclick="goIndex()">Home</button>
     <button onclick="viewArticles()">View Articles</button>
     <button onclick="viewSources()">View Sources</button>
     <button onclick="viewReports()">View Reports</button>
     <button onclick="generateReport()">Generate Report</button>
     <button onclick="getArticles()">Get New Articles</button>
     <button onclick="queryReport()">Query Report</button>
-    <button onclick="viewBatches()">View Batched Articles</button>""
+    <button onclick="viewBatches()">View Batched Articles</button>
 
     <script>
+        function goIndex() {
+            // Redirect to the Index Page
+            window.location.href = "/";
+        }
         function viewArticles() {
             // Redirect to the collections page
             window.location.href = "/view_articles";

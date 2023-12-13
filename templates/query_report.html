@@ -31,6 +31,7 @@
     </style>
 </head>
 <body>
+    <button onclick="goIndex()">Home</button>
     <h1>Enter a Report ID for full Report Query with Articles</h1>
     <form action="/query_report" method="post">
         <label for="search_query">Search:</label>
@@ -39,5 +40,11 @@
     </form>
     <h1>News Article Data</h1>
     {{ tables|safe }}
+    <script>
+        function goIndex() {
+            // Redirect to the Index Page
+            window.location.href = "/";
+        }
+    </script>
 </body>
 </html>

@@ -6,6 +6,7 @@
     <title>Get New Articles by Keyword</title>
 </head>
 <body>
+    <button onclick="goIndex()">Home</button>
     <h1>Get new articles by keyword</h1>
     
     <!-- Form to input the keyword -->
@@ -17,5 +18,10 @@
 
     <!-- Display the report results table -->
     {{ report_table | safe }}
+    <script>
+        function goIndex() {
+            window.location.href = "/";
+        }
+    </script>
 </body>
 </html>

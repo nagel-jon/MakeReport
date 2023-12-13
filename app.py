@@ -239,14 +239,15 @@ def get_articles_by_keyword():
 def generate_report_from_articles():
     if request.method == 'POST':
         # Handle the POST request to generate the report
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         search_query = request.form['search_query']
+        batch_name = request.form['batch_name']
 
         openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
         # Get the article content from MongoDB
-        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-        articles = news_articles.find()
-
+        articles = news_articles.find({"batch_name": batch_name})
+        print (articles)
         # Concatenate article titles and content with search_query
         report = search_query
         character_count = len(report)
@@ -280,6 +281,7 @@ def generate_report_from_articles():
             "search_query": search_query,
             "report": gpt_response_content,
             "article_ids": used_article_ids,
+            "batch_name": batch_name
         }
 
         reports.insert_one(report_data)
@@ -287,14 +289,16 @@ def generate_report_from_articles():
         return render_template('generate_report_from_articles.html', search_query=search_query, report=report_data)
     
     else:
-        # Handle the GET request, define an empty report
-        report_data = {"search_query": "", "report": "", "article_ids": []}
-        return render_template('generate_report_from_articles.html', search_query="", report=report_data)
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+
+        df = pd.DataFrame(list(batches.find()))
+        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+        return render_template('/generate_report_from_articles.html', tables=[html_table], titles=df.columns.values )
 
     
 @app.route('/query_report', methods=['GET', 'POST'])
 def query_report():
-    client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
     if request.method == 'POST':
         # If a search is entered, fetch the report and associated articles
         report_id = request.form['search_query']
@@ -333,8 +337,6 @@ def query_report():
         # Render the template with the default reports table
         return render_template('view_reports.html', report_table=report_html, articles_table=None)
 
-
-        return render_template('query_report.html', tables=[html_table], titles=df.columns.values, search_query=search_query)
 
 
     

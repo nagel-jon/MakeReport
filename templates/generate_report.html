@@ -7,23 +7,23 @@
 </head>
 <body>
     <h1>Click A Below Option to Generate a Report via the following Criteria</h1>
-
+    <button onclick="goIndex()">Home</button>
     <button onclick="generateReportFromArticles()">Generate Report from Stored Articles</button>
     <button onclick="generateReportBySource()">Generate Report By Source</button>
     <button onclick="generateReportByDate()">Generate Report By Date</button>
 
     <script>
         function generateReportFromArticles() {
-            // Redirect to the collections page
             window.location.href = "/generate_report_from_articles";
         }
         function generateReportBySource() {
-            // Redirect to the collections page
             window.location.href = "/generate_report_by_source";
         }
         function generateReportByDate() {
-            // Redirect to the collections page
             window.location.href = "/generate_report_by_date";
+        }
+        function goIndex() {
+            window.location.href = "/";
         }
     </script>
 </body>

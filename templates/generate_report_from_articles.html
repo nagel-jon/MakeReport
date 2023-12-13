@@ -3,20 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Report by Keyword</title>
+    <title>News Article Data</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f29d;
+        }
+
+        th {
+            background-color: #375e94;
+            color: white;
+        }
+
+        /* Additional style for the search form */
+        form {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Enter report details for ChatGPT</h1>
-    
-    <!-- Form to input the keyword -->
+    <button onclick="goIndex()">Home</button>
     <form action="/generate_report_from_articles" method="post">
-        <label for="keyword">Enter Keyword:</label>
+        <label for="search_query">Enter Report Context String Here:</label>
         <input type="text" id="search_query" name="search_query" required>
-        <button type="submit">Generate Report</button>
-    </form>
 
-    <!-- Display the report results table -->
-    <h2>Generated Report:</h2>
-    <p>{{ report.report | safe }}</p>
+        <!-- Add a second input field for batch_name -->
+        <label for="batch_name">Enter Batch Name Here:</label>
+        <input type="text" id="batch_name" name="batch_name" required>
+
+        <button type="submit">Search</button>
+    </form>
+    <h1>Batch Data</h1>
+    {{ tables|safe }}
+    <script>
+        function goIndex() {
+            // Redirect to the Index Page
+            window.location.href = "/";
+        }
+    </script>
 </body>
 </html>
