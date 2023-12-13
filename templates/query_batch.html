@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Batches</title>
+    <title>Enter Batch name for contained Articles and Related Reports</title>
     <style>
         table {
             border-collapse: collapse;
@@ -32,13 +32,14 @@
 </head>
 <body>
     <button onclick="goIndex()">Home</button>
-    <form action="/view_batches" method="post">
-        <label for="search_query">Enter batch_name:</label>
+    <h1>Enter Batch name for contained Articles and Related Reports</h1>
+    <form action="/query_batch" method="post">
+        <label for="search_query">Search:</label>
         <input type="text" id="search_query" name="search_query" required>
         <button type="submit">Search</button>
     </form>
-    <h1>Enter Batch Number to Display its Articles</h1>
-    {{ tables|safe }}
+    <h1>Batch Data</h1>
+    {{ report_table|safe }}
     <script>
         function goIndex() {
             // Redirect to the Index Page

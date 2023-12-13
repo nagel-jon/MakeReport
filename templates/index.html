@@ -1,24 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>MakeReport</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4c1;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #3f6aae;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <h1>Enter News Keyword to Generate a Report</h1>
     <u1>
-        <li>Click a View Button to see the Objects in that Collection</li>
-        <li>Click Generate Report to generate a new News Report</li>
-    </u1>    
-    <button onclick="goIndex()">Home</button>
-    <button onclick="viewArticles()">View Articles</button>
-    <button onclick="viewSources()">View Sources</button>
-    <button onclick="viewReports()">View Reports</button>
-    <button onclick="generateReport()">Generate Report</button>
-    <button onclick="getArticles()">Get New Articles</button>
-    <button onclick="queryReport()">Query Report</button>
-    <button onclick="viewBatches()">View Batched Articles</button>
+        <li>Click a View Button to see and Search Objects in that Collection</li>
+    </u1>
+
+    <div class="button-row">
+        <button onclick="goIndex()">Home</button>
+        <button onclick="viewArticles()">View Articles</button>
+        <button onclick="viewSources()">View Sources</button>
+        <button onclick="viewReports()">View Reports</button>
+        <button onclick="viewBatches()">View Batched Articles</button>
+    </div>
+    <u1>
+        <li>To Get News Articles by Keyword or Generate a Report</li>
+    </u1>
+
+    <div class="button-row">
+        <button onclick="generateReport()">Generate Report</button>
+        <button onclick="getArticles()">Get New Articles</button>
+    </div>
+    <u1>
+        <li>To Query a Report or Batch</li>
+    </u1>
+        <div class="button-row">
+        <button onclick="queryBatch()">Query Batch</button>
+        <button onclick="queryReport()">Query Report</button>
+    </div>
 
     <script>
         function goIndex() {
@@ -52,6 +107,10 @@
         function viewBatches() {
             // Redirect to the collections page
             window.location.href = "/view_batches";
+        }
+        function queryBatch() {
+            // Redirect to the collections page
+            window.location.href = "/query_batch";
         }
     </script>
 </body>

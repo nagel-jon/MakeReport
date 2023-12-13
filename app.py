@@ -166,16 +166,15 @@ def view_batches():
         search_query = request.form['search_query']
         result_cursor = news_articles.find({"batch_name": search_query})
         results_df = pd.DataFrame(list(result_cursor))
-        print(results_df)
         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
 
         # Check if results_df is a string (indicating an error message)
         if isinstance(results_df, str):
-            return render_template('search_articles.html', error_message=results_df)
+            return render_template('view_batches.html', error_message=results_df)
 
         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
 
-        return render_template('search_articles.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
+        return render_template('view_batches.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
     else:
         # Handle the regular display of articles without a search query
         df = pd.DataFrame(list(collection.find()))
@@ -252,7 +251,7 @@ def get_articles_by_keyword():
                 get_sources_from_url(cleaned_article, batch_name)
                 
 
-            batches.insert_one({"batch_name": batch_name})
+            batches.insert_one({"batch_name": batch_name, "search_query": search_query})
 
             df = pd.DataFrame(list(news_articles.find({"batch_name": batch_name})))
             html_table = df.to_html(classes='table table-striped table-bordered', index=False)
@@ -272,7 +271,6 @@ def generate_report_from_articles():
 
         # Get the article content from MongoDB
         articles = news_articles.find({"batch_name": batch_name})
-        print (articles)
         # Concatenate article titles and content with search_query
         report = search_query
         character_count = len(report)
@@ -353,6 +351,7 @@ def query_report():
                 return render_template('view_reports.html', report_table=report_html, articles_table=articles_html)
         except Exception as e:
             print(f"Error: {e}")
+            return query_report()
 
     else:
         # If no search is entered, display the default table of reports
@@ -362,6 +361,129 @@ def query_report():
         # Render the template with the default reports table
         return render_template('view_reports.html', report_table=report_html, articles_table=None)
 
+
+ 
+# @app.route('/query_batch', methods=['GET', 'POST'])
+# def query_batch():
+#     client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+#     if request.method == 'POST':
+#         # If a search is entered, fetch the report and associated articles
+#         batch_name = request.form['search_query']
+
+#         try:
+#             batch = batches.find_one({"batch_name": batch_name})
+
+#             if batch:
+#                 # Convert the report dictionary to a DataFrame
+#                 batch_df = pd.DataFrame([batch])
+
+#                 # Get the list of article IDs used to generate the report
+#                 article_ids = batch.get("article_ids", [])
+#                 print(article_ids)
+                
+#                 # Fetch the articles from MongoDB using the list of article IDs
+#                 articles = news_articles.find({"_id": {"$in": article_ids}})
+#                 articles_df = pd.DataFrame(list(articles))
+                
+#                 # Convert DataFrames to HTML tables
+#                 batch_html = batch_df.to_html(classes='table table-striped table-bordered', index=False)
+#                 articles_html = articles_df.to_html(classes='table table-striped table-bordered', index=False)
+                
+#                 # Render the template with report and articles tables
+#                 return render_template('query_batch.html', report_table=batch_html, articles_table=articles_html)
+#         except Exception as e:
+#             print(f"Error: {e}")
+#             return query_report()
+
+#     else:
+#         # If no search is entered, display the default table of reports
+#         batches_df = pd.DataFrame(list(batches.find()))
+#         batches_html = batches_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+#         # Render the template with the default reports table
+#         return render_template('query_batch.html', report_table=batch_html, articles_table=None)
+
+
+# @app.route('/query_batch', methods=['GET', 'POST'])
+# def query_batch():
+#     client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+#     if request.method == 'POST':
+#         # If a search is entered, fetch the report and associated articles
+#         batch_name = request.form['search_query']
+
+#         try:
+#             batch = batches.find_one({"batch_name": batch_name})
+
+#             if batch:
+#                 # Convert the report dictionary to a DataFrame
+#                 batch_df = pd.DataFrame([batch])
+
+#                 # Get the list of article IDs used to generate the report
+#                 article_ids = batch.get("article_ids", [])
+#                 print(article_ids)
+                
+#                 # Fetch the articles from MongoDB using the list of article IDs
+#                 articles = news_articles.find({"_id": {"$in": article_ids}})
+#                 articles_df = pd.DataFrame(list(articles))
+                
+#                 # Convert DataFrames to HTML tables
+#                 batch_html = batch_df.to_html(classes='table table-striped table-bordered', index=False)
+#                 articles_html = articles_df.to_html(classes='table table-striped table-bordered', index=False)
+                
+#                 # Render the template with report and articles tables
+#                 return render_template('view_batches', report_table=batch_html, articles_table=articles_html)
+#         except Exception as e:
+#             print(f"Error: {e}")
+#             return query_report()
+
+#     else:
+#         # If no search is entered, display the default table of reports
+#         batches_df = pd.DataFrame(list(batches.find()))
+#         batches_html = batches_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+#         # Render the template with the default batches table
+#         return render_template('query_batch.html', report_table=batches_html, articles_table=None)
+
+
+@app.route('/query_batch', methods=['GET', 'POST'])
+def query_batch():
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+    if request.method == 'POST':
+        # If a search is entered, fetch the report and associated articles
+        batch_name = request.form['search_query']
+
+        try:
+            batch = batches.find_one({"batch_name": batch_name})
+
+            if batch:
+                # Convert the report dictionary to a DataFrame
+                batch_df = pd.DataFrame([batch])
+
+                # Get the list of article IDs used to generate the report
+                article_ids = batch.get("article_ids", [])
+                print(article_ids)
+                
+                # Fetch the articles from MongoDB using the list of article IDs
+                articles = news_articles.find({"_id": {"$in": article_ids}})
+                articles_df = pd.DataFrame(list(articles))
+                
+                # Convert DataFrames to HTML tables
+                batch_html = batch_df.to_html(classes='table table-striped table-bordered', index=False)
+                articles_html = articles_df.to_html(classes='table table-striped table-bordered', index=False)
+                
+                # Render the template with report and articles tables
+                return render_template('query_batch.html', report_table=batch_html, articles_table=articles_html)
+        except Exception as e:
+            print(f"Error: {e}")
+            return query_report()
+
+    else:
+        # If no search is entered, display the default table of batches
+        batches_df = pd.DataFrame(list(batches.find()))
+        batches_html = batches_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+        # Render the template with the default batches table
+        return render_template('query_batch.html', report_table=batches_html, articles_table=None)
 
 
     
