@@ -138,6 +138,25 @@ def view_sources():
 
         return render_template('view_sources.html', tables=[html_table], titles=df.columns.values)
 
+# @app.route('/view_batches', methods=['GET', 'POST'])
+# def view_batches():
+#     client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+#     collection = db.batches
+    
+#     if request.method == 'POST':
+#         search_query = request.form['search_query']
+#         results_df = search_source_mongo(search_query)
+
+#         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+
+#         return render_template('search_articles.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
+#     else:
+#         # Handle the regular display of articles without a search query
+#         df = pd.DataFrame(list(collection.find()))
+#         html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+
+#         return render_template('view_batches.html', tables=[html_table], titles=df.columns.values)
+
 @app.route('/view_batches', methods=['GET', 'POST'])
 def view_batches():
     client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
@@ -145,18 +164,24 @@ def view_batches():
     
     if request.method == 'POST':
         search_query = request.form['search_query']
-        results_df = search_source_mongo(search_query)
+        result_cursor = news_articles.find({"batch_name": search_query})
+        results_df = pd.DataFrame(list(result_cursor))
+        print(results_df)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+
+        # Check if results_df is a string (indicating an error message)
+        if isinstance(results_df, str):
+            return render_template('search_articles.html', error_message=results_df)
 
         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
 
-        return render_template('search_result.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
+        return render_template('search_articles.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
     else:
         # Handle the regular display of articles without a search query
         df = pd.DataFrame(list(collection.find()))
         html_table = df.to_html(classes='table table-striped table-bordered', index=False)
 
         return render_template('view_batches.html', tables=[html_table], titles=df.columns.values)
-
 
 
 @app.route('/generate_report', methods=['GET'])
