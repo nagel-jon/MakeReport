@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Article Data</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f29d;
+        }
+
+        th {
+            background-color: #375e94;
+            color: white;
+        }
+
+        /* Additional style for the search form */
+        form {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <form action="/view_batches" method="post">
+        <label for="search_query">Search:</label>
+        <input type="text" id="search_query" name="search_query" required>
+        <button type="submit">Search</button>
+    </form>
+    <h1>News Article Data</h1>
+    {{ tables|safe }}
+</body>
+</html>

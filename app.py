@@ -21,12 +21,14 @@ def connect_to_mongodb():
     topics = db.topics
     sources = db.sources
     reports = db.reports
-    return client, db, news_articles, topics, sources, reports
+    batches = db.batches
+    
+    return client, db, news_articles, topics, sources, reports, batches
 
 # Helper functions
 def perform_search_article_mongo(query):
     # Use the query to search the MongoDB collection and retrieve the results
-    client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
     result_cursor = news_articles.find({"title": {"$regex": f'.*{query}.*', "$options": "i"}})
     results_df = pd.DataFrame(list(result_cursor))
 
@@ -36,7 +38,7 @@ def perform_search_article_mongo(query):
 
 def search_source_mongo(query):
     # Perform a case-insensitive search in MongoDB collection
-    client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
     result_cursor = sources.find({'name': {'$regex': f'.*{query}.*', '$options': 'i'}})
     results_df = pd.DataFrame(list(result_cursor))
 
@@ -46,7 +48,7 @@ def search_source_mongo(query):
 
 def perform_search_report_mongo(query):
     # Use the query to search the MongoDB collection and retrieve the results
-    client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
     result_cursor = reports.find({"report": {"$regex": f'.*{query}.*', "$options": "i"}})
     results_df = pd.DataFrame(list(result_cursor))
 
@@ -54,7 +56,9 @@ def perform_search_report_mongo(query):
     html_table = results_df.to_html(classes='table table-bordered', index=False)
     return html_table
 
-def get_sources_from_url(article):
+def get_sources_from_url(article, batch_name):
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+
     url = article.get("url", "")
     article_id = article.get("_id", "")
     parsed_url = urlparse(url)
@@ -62,7 +66,8 @@ def get_sources_from_url(article):
     source = {
         "name": domain,
         "url": url,
-        "article_id": article_id
+        "article_id": article_id,
+        "batch_name": batch_name
     }
     db.sources.insert_one(source)
 
@@ -73,7 +78,7 @@ def index():
 
 @app.route('/view_reports', methods=['GET', 'POST'])
 def view_reports():
-    client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
     collection = db.reports
     
     if request.method == 'POST':
@@ -85,15 +90,16 @@ def view_reports():
         return render_template('search_reports.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
     else:
         # Handle the regular display of articles without a search query
-        df = pd.DataFrame(list(collection.find()))
-        search_query = None
-        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+        reports_df = pd.DataFrame(list(reports.find()))
+        report_html = reports_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+        # Render the template with the default reports table
+        return render_template('view_reports.html', report_table=report_html, articles_table=None)
 
-        return render_template('view_reports.html', tables=[html_table], titles=df.columns.values, search_query=search_query)
 
 @app.route('/view_articles', methods=['GET', 'POST'])
 def view_articles():
-    client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
     collection = db.news_articles
     
     if request.method == 'POST':
@@ -111,9 +117,11 @@ def view_articles():
 
         return render_template('view_articles.html', tables=[html_table], titles=df.columns.values, search_query=search_query)
 
+
+
 @app.route('/view_sources', methods=['GET', 'POST'])
 def view_sources():
-    client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+    client, db, news_azticles, topics, sources, reports, batches = connect_to_mongodb()
     collection = db.sources
     
     if request.method == 'POST':
@@ -129,6 +137,27 @@ def view_sources():
         html_table = df.to_html(classes='table table-striped table-bordered', index=False)
 
         return render_template('view_sources.html', tables=[html_table], titles=df.columns.values)
+
+@app.route('/view_batches', methods=['GET', 'POST'])
+def view_batches():
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+    collection = db.batches
+    
+    if request.method == 'POST':
+        search_query = request.form['search_query']
+        results_df = search_source_mongo(search_query)
+
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+
+        return render_template('search_result.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
+    else:
+        # Handle the regular display of articles without a search query
+        df = pd.DataFrame(list(collection.find()))
+        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+
+        return render_template('view_batches.html', tables=[html_table], titles=df.columns.values)
+
+
 
 @app.route('/generate_report', methods=['GET'])
 def generate_report():
@@ -158,7 +187,8 @@ def search_sources():
 def get_articles_by_keyword():
     if request.method == 'POST':
         search_query = request.form['keyword']
-        client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        batch_name = "batch" + "_" + datetime.now().strftime("%Y%m%d%H%M%S")
         news_articles = db.news_articles
 
         # Call News API here with search_query
@@ -180,11 +210,7 @@ def get_articles_by_keyword():
             # Extract and clean the articles
             articles = response.json().get("articles", [])
 
-            # Clear previous data in the database
-            news_articles.delete_many({})
 
-            # Clear Sources List 
-            sources.delete_many({})
 
             # Insert cleaned articles into the database
             for article in articles:
@@ -194,14 +220,16 @@ def get_articles_by_keyword():
                     "url": article.get("url", ""),
                     "urlToImage": article.get("urlToImage", ""),
                     "publishedAt": article.get("publishedAt", ""),
-                    "content": article.get("content", "")
+                    "content": article.get("content", ""),
+                    "batch_name": batch_name
                 }
                 news_articles.insert_one(cleaned_article)
-                get_sources_from_url(cleaned_article)
+                get_sources_from_url(cleaned_article, batch_name)
                 
 
+            batches.insert_one({"batch_name": batch_name})
 
-            df = pd.DataFrame(list(news_articles.find()))
+            df = pd.DataFrame(list(news_articles.find({"batch_name": batch_name})))
             html_table = df.to_html(classes='table table-striped table-bordered', index=False)
             return render_template('view_articles.html', tables=[html_table], titles=df.columns.values, search_query=search_query)
     else:
@@ -216,7 +244,7 @@ def generate_report_from_articles():
         openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
         # Get the article content from MongoDB
-        client, db, news_articles, topics, sources, reports = connect_to_mongodb()
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         articles = news_articles.find()
 
         # Concatenate article titles and content with search_query
