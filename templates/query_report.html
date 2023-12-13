@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Reports</title>
+    <title>News Article Data</title>
     <style>
         table {
             border-collapse: collapse;
@@ -31,28 +31,13 @@
     </style>
 </head>
 <body>
-    <h1>View Reports</h1>
-    
-    <!-- Search Form -->
+    <h1>Enter a Report ID for full Report Query with Articles</h1>
     <form action="/query_report" method="post">
-        <label for="search_query">Search by Report ID:</label>
+        <label for="search_query">Search:</label>
         <input type="text" id="search_query" name="search_query" required>
         <button type="submit">Search</button>
     </form>
-
-    {% if report_table %}
-        <!-- Display Report Table -->
-        <h2>Report Details</h2>
-        {{ report_table|safe }}
-        
-        {% if articles_table %}
-            <!-- Display Articles Table -->
-            <h2>Articles Used to Generate the Report</h2>
-            {{ articles_table|safe }}
-        {% endif %}
-    {% else %}
-        <!-- Display a message when no report is found -->
-        <p>No matching report found for the specified ID.</p>
-    {% endif %}
+    <h1>News Article Data</h1>
+    {{ tables|safe }}
 </body>
 </html>
