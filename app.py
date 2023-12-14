@@ -473,7 +473,7 @@ def batched_on():
         date = date.replace('-', '')  # Remove dashes from the date
         print(date)
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-        result_cursor = batches.find({"batch_name": {"$regex": f'.*{date}.*', "$options": "i"}})
+        result_cursor = batches.find({"batch_name": {"$regex": f'{date}', "$options": "i"}})
         results_df = pd.DataFrame(list(result_cursor))
         print(results_df)
         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
@@ -494,7 +494,7 @@ def batched_before():
         date = request.form['search_date']
         date = date.replace('-', '')  # Remove dashes from the date
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-        result_cursor = batches.find({"batch_name": {"$lt": date}})
+        result_cursor = batches.find({"batch_name": {"$regex": f'{date}', "$options": "i", "$lt": date}})
         results_df = pd.DataFrame(list(result_cursor))
         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
         
