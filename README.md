@@ -7,8 +7,10 @@ Instructions:
 2. Install MongoDB Community Edition Locally
 3. Navigate to Repository Directory
 4. Activate Python Virtual Environment (source venv/bin/activate for linux)
-5. Run app with flask run
-6. Go to http://localhost:5000/ in browser to view
+5. Install Python Packages (list below)
+6. Add API Keys to Environment or .env file
+7. Run app with flask run
+8. Go to http://localhost:5000/ in browser to view
 
 Goal: To Make News Reports synthesizing Online News Media  
 MakeReport works by gathering News Sources Based on either Keyword Search. Allowing for report generation for a specific topic of interest or a point in time.
@@ -20,7 +22,8 @@ This can all be done in natural language as the report generation is done by Cha
 
 
 
-Need 3 Query Types:
-1. By String Matching
-2. By Querying a Report - This joins the report and the Articles used to Generate it and outputs the results to the screen
-3. 
+3 Query Types:
+1. String Matching
+2. Report and Batch Query
+3. Boolean Date Comparison
+

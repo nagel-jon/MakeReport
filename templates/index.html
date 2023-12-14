@@ -68,11 +68,12 @@
         <button onclick="getArticles()">Get New Articles</button>
     </div>
     <u1>
-        <li>To Query a Report or Batch</li>
+        <li>To Query a Report, Batch, or Date</li>
     </u1>
         <div class="button-row">
         <button onclick="queryBatch()">Query Batch</button>
         <button onclick="queryReport()">Query Report</button>
+        <button onclick="queryDate()">Query Date</button>
     </div>
 
     <script>
@@ -111,6 +112,10 @@
         function queryBatch() {
             // Redirect to the collections page
             window.location.href = "/query_batch";
+        }
+        function queryDate() {
+            // Redirect to the collections page
+            window.location.href = "/query_date";
         }
     </script>
 </body>

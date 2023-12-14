@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Article Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4c1;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #3f6aae;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin-top: 20px; /* Add some space between the form and the table */
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border: 1px solid #ddd; /* Add borders to cells */
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f29d;
+        }
+
+        th {
+            background-color: #375e94;
+            color: white;
+        }
+
+        /* Additional style for the search form */
+        form {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="goIndex()">Home</button>
+    <form action="/published_on" method="post">
+        <label for="search_date">Search by Date:</label>
+        <input type="date" id="search_date" name="search_date" required>
+        <button type="submit">Search</button>
+    </form>
+    <h1>Enter Date to See Articles Published On</h1>
+    {{ tables|safe }}
+    <script>
+        function goIndex() {
+            // Redirect to the Index Page
+            window.location.href = "/";
+        }
+    </script>
+</body>
+</html>

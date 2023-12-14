@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>MakeReport</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4c1;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #3f6aae;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Query By Date</h1>
+    
+    <div class="button-row">
+        <button onclick="goIndex()">Home</button>
+    </div>
+    <u1>
+        <li>See Publishing or Batch Date With the Following</li>
+    </u1>
+    <u1>
+        <li>See Publishing Dates </li>
+    </u1>
+    <div class="button-row">
+        <button onclick="publishedOn()">Published On Date</button>
+        <button onclick="publishedBefore()">Published Before Date</button>
+        <button onclick="publishedAfter()">Published After Date</button>
+    </div>
+    <u1>
+        <li>See Batch Dates </li>
+    </u1>
+    <div class="button-row">
+        <button onclick="batchedOn()">Batched On Date</button>
+        <button onclick="batchedBefore()">Batched Before Date</button>
+        <button onclick="batchedAfter()">View After Date</button>
+
+
+    <script>
+        function goIndex() {
+            // Redirect to the Index Page
+            window.location.href = "/";
+        }
+        function publishedOn() {
+            // Redirect to the Index Page
+            window.location.href = "/published_on";
+        }
+        function publishedBefore() {
+            // Redirect to the Index Page
+            window.location.href = "/published_before";
+        }
+        function publishedAfter() {
+            // Redirect to the Index Page
+            window.location.href = "/published_after";
+        }
+        function batchedOn() {
+            // Redirect to the Index Page
+            window.location.href = "/batched_on";
+        }
+        function batchedBefore() {
+            // Redirect to the Index Page
+            window.location.href = "/batched_before";
+        }
+        function batchedAfter() {
+            // Redirect to the Index Page
+            window.location.href = "/batched_after";
+        }
+    </script>
+</body>
+</html>
