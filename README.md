@@ -27,3 +27,9 @@ This can all be done in natural language as the report generation is done by Cha
 2. Report and Batch Query
 3. Boolean Date Comparison
 
+Python Libraries Used:
+pip install pandas
+pip install Flask
+pip install pymongo
+pip install dotenv
+pip install openai

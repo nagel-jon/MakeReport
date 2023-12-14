@@ -426,5 +426,112 @@ def published_on():
         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
         return render_template('published_on.html', tables=[html_table], titles=results_df.columns.values)
 
+
+@app.route('/published_before', methods=['GET', 'POST'])
+def published_before():
+    if request.method == 'POST':
+        date = request.form['search_date']
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        result_cursor = news_articles.find({"publishedAt": {"$lt": date}})
+        results_df = pd.DataFrame(list(result_cursor))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+        return render_template('published_before.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
+
+
+    if request.method == 'GET':
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        results_df = pd.DataFrame(list(news_articles.find()))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        return render_template('published_before.html', tables=[html_table], titles=results_df.columns.values)
+
+
+@app.route('/published_after', methods=['GET', 'POST'])
+def published_after():
+    if request.method == 'POST':
+        date = request.form['search_date']
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        result_cursor = news_articles.find({"publishedAt": {"$gt": date}})
+        results_df = pd.DataFrame(list(result_cursor))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+        return render_template('published_after.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
+
+
+    if request.method == 'GET':
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        results_df = pd.DataFrame(list(news_articles.find()))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        return render_template('published_after.html', tables=[html_table], titles=results_df.columns.values)
+
+
+
+@app.route('/batched_on', methods=['GET', 'POST'])
+def batched_on():
+    if request.method == 'POST':
+        date = request.form['search_date']
+        date = date.replace('-', '')  # Remove dashes from the date
+        print(date)
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        result_cursor = batches.find({"batch_name": {"$regex": f'.*{date}.*', "$options": "i"}})
+        results_df = pd.DataFrame(list(result_cursor))
+        print(results_df)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+        return render_template('batched_on.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
+
+
+    if request.method == 'GET':
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        results_df = pd.DataFrame(list(batches.find()))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        return render_template('batched_on.html', tables=[html_table], titles=results_df.columns.values)
+
+
+@app.route('/batched_before', methods=['GET', 'POST'])
+def batched_before():
+    if request.method == 'POST':
+        date = request.form['search_date']
+        date = date.replace('-', '')  # Remove dashes from the date
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        result_cursor = batches.find({"batch_name": {"$lt": date}})
+        results_df = pd.DataFrame(list(result_cursor))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+        return render_template('batched_before.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
+
+
+    if request.method == 'GET':
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        results_df = pd.DataFrame(list(batches.find()))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        return render_template('batched_before.html', tables=[html_table], titles=results_df.columns.values)
+
+
+@app.route('/batched_after', methods=['GET', 'POST'])
+def batched_after():
+    if request.method == 'POST':
+        date = request.form['search_date']
+        date = date.replace('-', '')  # Remove dashes from the date
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        result_cursor = batches.find({"batch_name": {"$gt": date}})
+        results_df = pd.DataFrame(list(result_cursor))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        
+        return render_template('batched_after.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
+
+
+    if request.method == 'GET':
+        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+        results_df = pd.DataFrame(list(batches.find()))
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        return render_template('batched_after.html', tables=[html_table], titles=results_df.columns.values)
+
+
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
