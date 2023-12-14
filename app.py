@@ -10,6 +10,7 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from openai import OpenAI
+# from jinja import evalcontextfilter, Markup, escape
 
 app = Flask(__name__)
 
@@ -31,9 +32,10 @@ def perform_search_article_mongo(query):
     client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
     result_cursor = news_articles.find({"title": {"$regex": f'.*{query}.*', "$options": "i"}})
     results_df = pd.DataFrame(list(result_cursor))
+    df = df.dropna()
 
     # Convert DataFrame to HTML with custom styles
-    html_table = results_df.to_html(classes='table table-bordered', index=False)
+    html_table = results_df.to_html(classes='table table-bordered', index=False).replace('\n', '')
     return html_table
 
 def search_source_mongo(query):
@@ -43,7 +45,7 @@ def search_source_mongo(query):
     results_df = pd.DataFrame(list(result_cursor))
 
     # Convert DataFrame to HTML with custom styles
-    html_table = results_df.to_html(classes='table table-bordered', index=False)
+    html_table = results_df.to_html(classes='table table-bordered', index=False).replace('\n', '')
     return html_table
 
 def perform_search_report_mongo(query):
@@ -53,7 +55,7 @@ def perform_search_report_mongo(query):
     results_df = pd.DataFrame(list(result_cursor))
 
     # Convert DataFrame to HTML with custom styles
-    html_table = results_df.to_html(classes='table table-bordered', index=False)
+    html_table = results_df.to_html(classes='table table-bordered', index=False).replace('\n', '')
     return html_table
 
 def get_sources_from_url(article, batch_name):
@@ -85,16 +87,16 @@ def view_reports():
         search_query = request.form['search_query']
         results_df = perform_search_report_mongo(search_query)
 
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
 
         return render_template('search_reports.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
     else:
         # Handle the regular display of articles without a search query
         reports_df = pd.DataFrame(list(reports.find()))
-        report_html = reports_df.to_html(classes='table table-striped table-bordered', index=False)
+        report_html = reports_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         
         # Render the template with the default reports table
-        return render_template('view_reports.html', report_table=report_html, articles_table=None)
+        return render_template('view_reports.html', report_table=report_html, articles_table=None).replace('\n', '')
 
 
 @app.route('/view_articles', methods=['GET', 'POST'])
@@ -106,14 +108,14 @@ def view_articles():
         search_query = request.form['search_query']
         results_df = perform_search_article_mongo(search_query)
 
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
 
         return render_template('search_articles.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
     else:
         # Handle the regular display of articles without a search query
         df = pd.DataFrame(list(collection.find()))
         search_query = None
-        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
 
         return render_template('view_articles.html', tables=[html_table], titles=df.columns.values, search_query=search_query)
 
@@ -134,28 +136,10 @@ def view_sources():
     else:
         # Handle the regular display of articles without a search query
         df = pd.DataFrame(list(collection.find()))
-        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
 
         return render_template('view_sources.html', tables=[html_table], titles=df.columns.values)
 
-# @app.route('/view_batches', methods=['GET', 'POST'])
-# def view_batches():
-#     client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-#     collection = db.batches
-    
-#     if request.method == 'POST':
-#         search_query = request.form['search_query']
-#         results_df = search_source_mongo(search_query)
-
-#         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
-
-#         return render_template('search_articles.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
-#     else:
-#         # Handle the regular display of articles without a search query
-#         df = pd.DataFrame(list(collection.find()))
-#         html_table = df.to_html(classes='table table-striped table-bordered', index=False)
-
-#         return render_template('view_batches.html', tables=[html_table], titles=df.columns.values)
 
 @app.route('/view_batches', methods=['GET', 'POST'])
 def view_batches():
@@ -166,26 +150,26 @@ def view_batches():
         search_query = request.form['search_query']
         result_cursor = news_articles.find({"batch_name": search_query})
         results_df = pd.DataFrame(list(result_cursor))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
 
         # Check if results_df is a string (indicating an error message)
         if isinstance(results_df, str):
             return render_template('view_batches.html', error_message=results_df)
 
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
 
         return render_template('view_batches.html', tables=[html_table], titles=results_df.columns.values, search_query=search_query)
     else:
         # Handle the regular display of articles without a search query
         df = pd.DataFrame(list(collection.find()))
-        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
 
         return render_template('view_batches.html', tables=[html_table], titles=df.columns.values)
 
 
 @app.route('/generate_report', methods=['GET'])
 def generate_report():
-    return render_template('generate_report.html')
+    return render_template('generate_report_from_articles.html')
 
 @app.route('/search_articles', methods=['GET', 'POST'])
 def search_articles():
@@ -251,10 +235,10 @@ def get_articles_by_keyword():
                 get_sources_from_url(cleaned_article, batch_name)
                 
 
-            batches.insert_one({"batch_name": batch_name, "search_query": search_query})
+            batches.insert_one({"batch_name": batch_name, "search_query": search_query, "date": datetime.now().strftime("%Y%m%d%H%M%S")})
 
             df = pd.DataFrame(list(news_articles.find({"batch_name": batch_name})))
-            html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+            html_table = df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
             return render_template('view_articles.html', tables=[html_table], titles=df.columns.values, search_query=search_query)
     else:
         return render_template('get_articles.html')
@@ -315,7 +299,7 @@ def generate_report_from_articles():
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
 
         df = pd.DataFrame(list(batches.find()))
-        html_table = df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('/generate_report_from_articles.html', tables=[html_table], titles=df.columns.values )
 
     
@@ -343,8 +327,8 @@ def query_report():
                 articles_df = pd.DataFrame(list(articles))
                 
                 # Convert DataFrames to HTML tables
-                report_html = report_df.to_html(classes='table table-striped table-bordered', index=False)
-                articles_html = articles_df.to_html(classes='table table-striped table-bordered', index=False)
+                report_html = report_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
+                articles_html = articles_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
                 
                 # Render the template with report and articles tables
                 return render_template('view_reports.html', report_table=report_html, articles_table=articles_html)
@@ -355,7 +339,7 @@ def query_report():
     else:
         # If no search is entered, display the default table of reports
         reports_df = pd.DataFrame(list(reports.find()))
-        report_html = reports_df.to_html(classes='table table-striped table-bordered', index=False)
+        report_html = reports_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         
         # Render the template with the default reports table
         return render_template('view_reports.html', report_table=report_html, articles_table=None)
@@ -384,22 +368,22 @@ def query_batch():
                 articles_df = pd.DataFrame(list(articles))
                 
                 # Convert DataFrames to HTML tables
-                batch_html = batch_df.to_html(classes='table table-striped table-bordered', index=False)
-                articles_html = articles_df.to_html(classes='table table-striped table-bordered', index=False)
+                batch_html = batch_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
+                articles_html = articles_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
                 
                 # Render the template with report and articles tables
-                return render_template('view_batches.html', report_table=batch_html, articles_table=articles_html)
+                return render_template('query_batch.html', report_table=batch_html, articles_table=articles_html)
         except Exception as e:
             print(f"Error: {e}")
             return query_report()
 
     else:
-        # If no search is entered, display the default table of batches
+        # If no search is entered, display all batches
         batches_df = pd.DataFrame(list(batches.find()))
-        batches_html = batches_df.to_html(classes='table table-striped table-bordered', index=False)
+        batches_html = batches_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         
-        # Render the template with the default batches table
-        return render_template('view_batches.html', report_table=batches_html, articles_table=None)
+        # Render the template with the batches table
+        return render_template('query_batch.html', report_table=batches_html, articles_table=None)
 
 
 @app.route('/query_date')
@@ -415,7 +399,7 @@ def published_on():
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         result_cursor = news_articles.find({"publishedAt": {"$regex": f'.*{date}.*', "$options": "i"}})
         results_df = pd.DataFrame(list(result_cursor))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         
         return render_template('published_on.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
 
@@ -423,7 +407,7 @@ def published_on():
     if request.method == 'GET':
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         results_df = pd.DataFrame(list(news_articles.find()))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('published_on.html', tables=[html_table], titles=results_df.columns.values)
 
 
@@ -434,7 +418,7 @@ def published_before():
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         result_cursor = news_articles.find({"publishedAt": {"$lt": date}})
         results_df = pd.DataFrame(list(result_cursor))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         
         return render_template('published_before.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
 
@@ -442,7 +426,7 @@ def published_before():
     if request.method == 'GET':
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         results_df = pd.DataFrame(list(news_articles.find()))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('published_before.html', tables=[html_table], titles=results_df.columns.values)
 
 
@@ -453,7 +437,7 @@ def published_after():
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         result_cursor = news_articles.find({"publishedAt": {"$gt": date}})
         results_df = pd.DataFrame(list(result_cursor))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).repalce('\n', '')
         
         return render_template('published_after.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
 
@@ -461,7 +445,7 @@ def published_after():
     if request.method == 'GET':
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         results_df = pd.DataFrame(list(news_articles.find()))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('published_after.html', tables=[html_table], titles=results_df.columns.values)
 
 
@@ -476,7 +460,7 @@ def batched_on():
         result_cursor = batches.find({"batch_name": {"$regex": f'{date}', "$options": "i"}})
         results_df = pd.DataFrame(list(result_cursor))
         print(results_df)
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         
         return render_template('batched_on.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
 
@@ -484,51 +468,78 @@ def batched_on():
     if request.method == 'GET':
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         results_df = pd.DataFrame(list(batches.find()))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('batched_on.html', tables=[html_table], titles=results_df.columns.values)
+
 
 
 @app.route('/batched_before', methods=['GET', 'POST'])
 def batched_before():
     if request.method == 'POST':
-        date = request.form['search_date']
-        date = date.replace('-', '')  # Remove dashes from the date
-        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-        result_cursor = batches.find({"batch_name": {"$regex": f'{date}', "$options": "i", "$lt": date}})
-        results_df = pd.DataFrame(list(result_cursor))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
-        
-        return render_template('batched_before.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
+        search_date = request.form['search_date']
+        print(search_date)
 
+        results_df = get_results_lt(search_date)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
+
+        return render_template('batched_before.html', tables=[html_table], titles=results_df.columns.values, search_date=search_date)
 
     if request.method == 'GET':
-        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-        results_df = pd.DataFrame(list(batches.find()))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        results_df = get_results_lt("")
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('batched_before.html', tables=[html_table], titles=results_df.columns.values)
+
 
 
 @app.route('/batched_after', methods=['GET', 'POST'])
 def batched_after():
     if request.method == 'POST':
-        date = request.form['search_date']
-        date = date.replace('-', '')  # Remove dashes from the date
-        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-        result_cursor = batches.find({"batch_name": {"$gt": date}})
-        results_df = pd.DataFrame(list(result_cursor))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
-        
-        return render_template('batched_after.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
+        search_date = request.form['search_date']
+        print(search_date)
 
+        results_df = get_results_gt(search_date)
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
+
+        return render_template('batched_after.html', tables=[html_table], titles=results_df.columns.values, search_date=search_date)
 
     if request.method == 'GET':
-        client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-        results_df = pd.DataFrame(list(batches.find()))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False)
+        results_df = get_results_lt("")
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('batched_after.html', tables=[html_table], titles=results_df.columns.values)
 
 
+def convert_to_mongodb_date(search_date):
+    # Convert the 'YYYY-MM-DD' format to the format used in MongoDB ('YYYYMMDDHHMMSS')
+    search_datetime = datetime.strptime(search_date, '%Y-%m-%d')
+    return search_datetime.strftime('%Y%m%d%H%M%S')
 
+def get_results_lt(search_date):
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+    
+    try:
+        search_date_mongodb_format = convert_to_mongodb_date(search_date)
+        result_cursor = batches.find({"date": {"$lte": search_date_mongodb_format}})
+        results_df = pd.DataFrame(list(result_cursor))
+    except Exception as e:
+        # Handle MongoDB query exception
+        print(f"Error querying MongoDB: {e}")
+        results_df = pd.DataFrame()
+
+    return results_df
+
+def get_results_gt(search_date):
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+    
+    try:
+        search_date_mongodb_format = convert_to_mongodb_date(search_date)
+        result_cursor = batches.find({"date": {"$gte": search_date_mongodb_format}})
+        results_df = pd.DataFrame(list(result_cursor))
+    except Exception as e:
+        # Handle MongoDB query exception
+        print(f"Error querying MongoDB: {e}")
+        results_df = pd.DataFrame()
+
+    return results_df
 
 
 

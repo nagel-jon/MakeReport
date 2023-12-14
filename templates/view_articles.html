@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News Article Data</title>
     <style>
+        title {
+            text-align: center;
+            height: 50px;
+        }
         table {
             border-collapse: collapse;
             width: 80%;
@@ -15,6 +19,7 @@
             text-align: left;
             padding: 8px;
             border: 1px solid #ddd; /* Add borders to cells */
+            max-height: 10px;
         }
 
         tr:nth-child(even) {
@@ -30,6 +35,23 @@
         form {
             margin-bottom: 20px;
         }
+
+        /* Style for buttons */
+        button {
+            padding: 8px 15px;
+            background-color: #375e94;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Style for search bar */
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -40,7 +62,7 @@
         <button type="submit">Search</button>
     </form>
     <h1>News Article Data</h1>
-    {{ tables|safe }}
+    {{ tables|safe| replace('\n', '') }}
     <script>
         function goIndex() {
             // Redirect to the Index Page

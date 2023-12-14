@@ -13,6 +13,9 @@
         th, td {
             text-align: left;
             padding: 8px;
+            border: 1px solid #ddd; /* Add borders to cells */
+            max-height: 10px; overflow: hidden;
+
         }
 
         tr:nth-child(even) {
@@ -28,6 +31,22 @@
         form {
             margin-bottom: 20px;
         }
+
+        /* Style for the button */
+        button {
+            background-color: #375e94;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Style for the search bar */
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -40,6 +59,13 @@
         <input type="text" id="search_query" name="search_query" required>
         <button type="submit">Search</button>
     </form>
+    <script>
+        function goIndex() {
+            // Redirect to the Index Page
+            console.log("Redirecting to the Index Page");
+            window.location.href = "/";
+        }
+    </script>
 
     {% if report_table %}
         <!-- Display Report Table -->
@@ -55,11 +81,5 @@
         <!-- Display a message when no report is found -->
         <p>No matching report found for the specified ID.</p>
     {% endif %}
-    <script>
-        function goIndex() {
-            // Redirect to the Index Page
-            window.location.href = "/";
-        }
-    </script>
 </body>
 </html>
