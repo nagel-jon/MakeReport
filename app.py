@@ -73,6 +73,41 @@ def get_sources_from_url(article, batch_name):
     }
     db.sources.insert_one(source)
 
+
+def convert_to_mongodb_date(search_date):
+    # Convert the 'YYYY-MM-DD' format to the format used in MongoDB ('YYYYMMDDHHMMSS')
+    search_datetime = datetime.strptime(search_date, '%Y-%m-%d')
+    return search_datetime.strftime('%Y%m%d%H%M%S')
+
+def get_results_lt(search_date):
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+    
+    try:
+        search_date_mongodb_format = convert_to_mongodb_date(search_date)
+        result_cursor = batches.find({"date": {"$lte": search_date_mongodb_format}})
+        results_df = pd.DataFrame(list(result_cursor))
+    except Exception as e:
+        # Handle MongoDB query exception
+        print(f"Error querying MongoDB: {e}")
+        results_df = pd.DataFrame()
+
+    return results_df
+
+def get_results_gt(search_date):
+    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
+    
+    try:
+        search_date_mongodb_format = convert_to_mongodb_date(search_date)
+        result_cursor = batches.find({"date": {"$gte": search_date_mongodb_format}})
+        results_df = pd.DataFrame(list(result_cursor))
+    except Exception as e:
+        # Handle MongoDB query exception
+        print(f"Error querying MongoDB: {e}")
+        results_df = pd.DataFrame()
+
+    return results_df
+
+
 # Routes
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -170,6 +205,7 @@ def view_batches():
 @app.route('/generate_report', methods=['GET'])
 def generate_report():
     return render_template('generate_report_from_articles.html')
+
 
 @app.route('/search_articles', methods=['GET', 'POST'])
 def search_articles():
@@ -437,7 +473,7 @@ def published_after():
         client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
         result_cursor = news_articles.find({"publishedAt": {"$gt": date}})
         results_df = pd.DataFrame(list(result_cursor))
-        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).repalce('\n', '')
+        html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         
         return render_template('published_after.html', tables=[html_table], titles=results_df.columns.values, search_date=date)
 
@@ -506,40 +542,6 @@ def batched_after():
         results_df = get_results_lt("")
         html_table = results_df.to_html(classes='table table-striped table-bordered', index=False).replace('\n', '')
         return render_template('batched_after.html', tables=[html_table], titles=results_df.columns.values)
-
-
-def convert_to_mongodb_date(search_date):
-    # Convert the 'YYYY-MM-DD' format to the format used in MongoDB ('YYYYMMDDHHMMSS')
-    search_datetime = datetime.strptime(search_date, '%Y-%m-%d')
-    return search_datetime.strftime('%Y%m%d%H%M%S')
-
-def get_results_lt(search_date):
-    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-    
-    try:
-        search_date_mongodb_format = convert_to_mongodb_date(search_date)
-        result_cursor = batches.find({"date": {"$lte": search_date_mongodb_format}})
-        results_df = pd.DataFrame(list(result_cursor))
-    except Exception as e:
-        # Handle MongoDB query exception
-        print(f"Error querying MongoDB: {e}")
-        results_df = pd.DataFrame()
-
-    return results_df
-
-def get_results_gt(search_date):
-    client, db, news_articles, topics, sources, reports, batches = connect_to_mongodb()
-    
-    try:
-        search_date_mongodb_format = convert_to_mongodb_date(search_date)
-        result_cursor = batches.find({"date": {"$gte": search_date_mongodb_format}})
-        results_df = pd.DataFrame(list(result_cursor))
-    except Exception as e:
-        # Handle MongoDB query exception
-        print(f"Error querying MongoDB: {e}")
-        results_df = pd.DataFrame()
-
-    return results_df
 
 
 

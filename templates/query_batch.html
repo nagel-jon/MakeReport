@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enter Batch name for contained Articles and Related Reports</title>
@@ -28,10 +25,37 @@
         form {
             margin-bottom: 20px;
         }
+
+        /* Style for the home button */
+        button#home-button {
+            background-color: #375e94;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Style for the search bar */
+        input#search_query {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button[type="submit"] {
+            background-color: #375e94;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
-    <button onclick="goIndex()">Home</button>
+    <button id="home-button" onclick="goIndex()">Home</button>
     <h1>Enter Batch name for contained Articles and Related Reports</h1>
     <form action="/query_batch" method="post">
         <label for="search_query">Search:</label>
